@@ -27,3 +27,8 @@ Linux &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;：添加sh到服务，可以重定向
 > Windows ：[https://www.v2ex.com/t/274392](https://www.v2ex.com/t/274392)
 > 
 > Linux &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;：[https://github.com/pztop/namesilo_ddns](https://github.com/pztop/namesilo_ddns/blob/master/namesilo_ddns.sh)
+
+
+还有一个Windows powershell脚本实现的
+
+> [https://www.ctrol.cn/post/freesource/domain-host/05-25-cartev-4719.html](https://www.ctrol.cn/post/freesource/domain-host/05-25-cartev-4719.html)
