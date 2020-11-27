@@ -20,3 +20,10 @@ Linux &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;：`./linux_runDDNS.sh`
 Windows ：将vbs文件[加入策略组](https://blog.csdn.net/yunmuq/article/details/110199091)
 
 Linux &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;：添加sh到服务，可以重定向输出到文件以检查服务运行情况。
+
+### 其他DDNS方案推荐
+都是用到了curl发送请求，把响应保存到文件中 ，再用脚本处理字符串。
+
+> Windows ：[https://www.v2ex.com/t/274392](https://www.v2ex.com/t/274392)
+> 
+> Linux &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;：[https://github.com/pztop/namesilo_ddns](https://github.com/pztop/namesilo_ddns/blob/master/namesilo_ddns.sh)
