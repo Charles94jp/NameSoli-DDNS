@@ -25,15 +25,27 @@ public class NameSoliDDNS {
 
         if (args.length == 2) {
             DNS_KEY = args[0];
-            DNS_DOMAIN = args[1];
+            SUBDOMAIN = args[1];
         } else if (args.length == 3) {
             DNS_KEY = args[0];
-            DNS_DOMAIN = args[1];
+            SUBDOMAIN = args[1];
             FREQUENCY = Long.valueOf(args[2]);
         } else {
             System.out.println("The program requires at least two parameters\n" +
-                    "1: namesilo key; 2: domain name (without prefix); optional parameter 3: the frequency of querying the local IP address (in milliseconds), the default is 600,000 milliseconds(10 min) once");
+                    "1: namesilo key; 2: domain name; optional parameter 3: the frequency of querying the local IP address (in milliseconds), the default is 600,000 milliseconds(10 min) once");
             System.exit(-1);
+        }
+        // 从子域名提取域名
+        DNS_DOMAIN = SUBDOMAIN.substring(SUBDOMAIN.lastIndexOf('.', SUBDOMAIN.lastIndexOf('.') - 1) + 1, SUBDOMAIN.length());
+        if (SUBDOMAIN.length() - DNS_DOMAIN.length() - 1 < 1) {
+            NO_SUBDOMAIN = true;
+            SUBDOMAIN = "";
+        } else {
+            SUBDOMAIN = SUBDOMAIN.substring(0, SUBDOMAIN.length() - DNS_DOMAIN.length() - 1);
+        }
+        // 判断操作系统，非win10不打印计时百分比,方便计入日志
+        if (System.getProperty("os.name").indexOf("Windows") != -1) {
+            IS_WINDOWS = true;
         }
 
 
@@ -49,7 +61,10 @@ public class NameSoliDDNS {
     }
 
     private static String DNS_KEY;
-    private static String DNS_DOMAIN;
+    private static String SUBDOMAIN; // 获取域名列表中的子域名对应的RRID必须要子域名来定位
+    private static boolean NO_SUBDOMAIN;
+    private static boolean IS_WINDOWS = false;
+    private static String DNS_DOMAIN; // 查域名列表、更新DNS只能用域名
     private static long FREQUENCY = 600000;
 
     private static String DNS_IP;
@@ -69,7 +84,7 @@ public class NameSoliDDNS {
     };
 
     private static final String API_GET_DNS_LIST_URL = "https://www.namesilo.com/api/dnsListRecords?version=1&type=xml";
-    private static final String API_UPDATE_DNS_URL = "https://www.namesilo.com/api/dnsUpdateRecord?version=1&type=xml&rrttl=7207&rrhost="; // rrhost即前缀，这里更新的是无前缀部分，rrid这里没有给出,rrvalue即新的IP
+    private static final String API_UPDATE_DNS_URL = "https://www.namesilo.com/api/dnsUpdateRecord?version=1&type=xml&rrttl=7207"; // rrhost即前缀，rrid这里没有给出,rrvalue即新的IP
     private static final String[][] NAMESILO_HEAD = {
             {"Host", "www.namesilo.com"},
             //{"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:82.0) Gecko/20100101 Firefox/82.0"},
@@ -85,8 +100,9 @@ public class NameSoliDDNS {
      * apiGetIP();
      */
     public static void init() {
+        System.out.println("initializing...");
         if (apiGetIP() == -1) {
-            System.out.println("init failed: Please check [ your namesilo key ] / [ domain name (without prefix) ] or [ your network ]");
+            System.out.println("initialization failed: Please check [ your namesilo key ] / [ domain name ] or [ your network ]");
             System.exit(-1);
         }
     }
@@ -116,13 +132,20 @@ public class NameSoliDDNS {
      */
     public static int apiGetIP() {
         String response = doGet(API_GET_DNS_LIST_URL + "&key=" + DNS_KEY + "&domain=" + DNS_DOMAIN, NAMESILO_HEAD);
-        int a = response.indexOf("<host>" + DNS_DOMAIN + "</host><value>");
+        int a = 0;
+        if (NO_SUBDOMAIN) {
+            a = response.indexOf("<host>" + DNS_DOMAIN + "</host><value>");
+        } else {
+            a = response.indexOf("<host>" + SUBDOMAIN + "." + DNS_DOMAIN + "</host><value>");
+        }
         if (a == -1) {
             System.out.println("apiGetIP(): " + response);
             return -1;
         }
+        a=response.indexOf("</host><value>",a);
         int z = response.indexOf("</value>", a);
-        DNS_IP = response.substring(a + 32, z);
+        DNS_IP = response.substring(a + 14, z);
+
         System.out.println("Get IP from NameSilo: " + DNS_IP);
 
         a = response.lastIndexOf("<record_id>", a);
@@ -149,13 +172,23 @@ public class NameSoliDDNS {
                 }
             }
 
+
             // 暂停10分钟，打印进度条
             try {
                 //bar.noBarPrint(15000);
-                bar.noBarPrint(FREQUENCY);
+                if (IS_WINDOWS) {
+                    bar.noBarPrint(FREQUENCY);
+                } else { // linux
+                    // 避免sleep过久无法唤醒，这只是我的猜测，不知道现实中会不会有无法唤醒的情况
+                    for (int i = 0; i < 100; i++) {
+                        Thread.sleep(FREQUENCY/100);
+                    }
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+
         }
     }
 
@@ -166,7 +199,7 @@ public class NameSoliDDNS {
      * @return 不成功返回-1，其他值都是成功
      */
     public static int apiUpdate(String myip) {
-        String response = doGet(API_UPDATE_DNS_URL + "&rrvalue=" + myip + "&rrid=" + DNS_RRID + "&key=" + DNS_KEY + "&domain=" + DNS_DOMAIN, NAMESILO_HEAD);
+        String response = doGet(API_UPDATE_DNS_URL + "&rrvalue=" + myip + "&rrid=" + DNS_RRID + "&key=" + DNS_KEY + "&domain=" + DNS_DOMAIN + "&rrhost=" + SUBDOMAIN, NAMESILO_HEAD);
         int a = response.lastIndexOf("<record_id>");
         if (a == -1) {
             System.out.println(response);
