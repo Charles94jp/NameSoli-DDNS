@@ -16,7 +16,7 @@ https://www.namesilo.com/api-reference#dns/dns-update-record 来查询和更新D
 本程序只能更新域名的DNS记录，无法增加，请确保你的域名存在此DNS记录
 
 ### 配置
-为了运行这个程序，你需要安装Java，java版本至少要1.8。首次运行之前你需要配置_conf.txt文件，填写你[从NameSilo获取](https://guozh.net/obtain-namesilo-api-key/)的api key，以及你的域名（不带前缀）。
+为了运行这个程序，你需要安装Java，java版本至少要1.8。首次运行之前你需要配置_conf.txt文件，填写你[从NameSilo获取](https://guozh.net/obtain-namesilo-api-key/)的api key，以及你的域名（~~不~~可带前缀）。
 
 Linux则要做额外配置，首先要确保 _conf.txt、linux_runDDNS.sh 是Linux格式，否则脚本在读取配置文件和拼接字符串时会出错。使用vi打开， `:set` 查看fileformat字段即文件格式，然后 `:set fileformat=unix` ，最后退出保存。接着设置脚本权限 `chmod +x linux_runDDNS.sh`
 
