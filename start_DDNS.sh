@@ -1,6 +1,3 @@
-# 清空日志
-echo > log_DDNS.log
-
 # 修改配置文件格式，避免拼接错误
 vi _conf.txt -c 'set fileformat=unix' -c 'wq'
 
