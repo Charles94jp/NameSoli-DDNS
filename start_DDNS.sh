@@ -1,3 +1,8 @@
+#开机自启
+#!/bin/sh
+# chkconfig:2345 95 05
+# description: DDNS
+
 # 修改配置文件格式，避免拼接错误
 vi _conf.txt -c 'set fileformat=unix' -c 'wq'
 
